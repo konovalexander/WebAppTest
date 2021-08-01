@@ -72,6 +72,11 @@ namespace Logic
             };
         }
 
+        public User GetUser()
+        {
+            return userRepository.GetUserById(1);
+        }
+
         public UserInfoResponse GetUserByPhone(string phone)
         {
             var user = userRepository.GetUser(u => u.Phone == phone);

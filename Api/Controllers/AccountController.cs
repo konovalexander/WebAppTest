@@ -32,9 +32,9 @@ namespace Api.Controllers
                 return View(registerRequest);
             }
 
-            bool isRegister = accountManager.Register(registerRequest);
+            bool isRegisterSuccess = accountManager.Register(registerRequest);
 
-            if (!isRegister)
+            if (!isRegisterSuccess)
             {
                 ModelState.AddModelError("", "Пользователь с таким телефоном и/или Email уже зарегистрирован");
                 return View(registerRequest);

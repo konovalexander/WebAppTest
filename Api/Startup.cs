@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api
 {
@@ -28,10 +29,31 @@ namespace Api
 
             services.AddControllersWithViews();
 
+            var authConfig = Configuration.GetSection("Auth");
+            services.Configure<AuthOptions>(authConfig);
+
+            var authOptions = authConfig.Get<AuthOptions>();
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
                         options.LoginPath = new PathString("/account/login");
+                    })
+                    .AddJwtBearer(options =>
+                    {
+                        options.RequireHttpsMetadata = false;
+                        options.SaveToken = true;
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidIssuer = authOptions.Issuer,
+                            ValidateAudience = true,
+                            ValidAudience = authOptions.Audience,
+                            ValidateLifetime = true,
+                            IssuerSigningKey = authOptions.GetSymmetricSecurityKey(),
+                            ValidateIssuerSigningKey = true,
+                            ClockSkew = System.TimeSpan.Zero
+                        };
                     });
 
             services.AddRepository(repositoryType, connectionString);
@@ -52,6 +74,8 @@ namespace Api
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
             app.UseAuthorization();
