@@ -48,10 +48,10 @@ namespace Data.Repositories
             return user;
         }
 
-        public void UpdateUser(User user)
+        public void UpdateLastLoginDate(int userId, DateTime dateTime)
         {
-            var existingUser = GetUserById(user.Id);
-            existingUser.LastLogin = DateTime.UtcNow;            
+            var existingUser = GetUserById(userId);
+            existingUser.LastLogin = dateTime;            
         }
 
         private int GenerateId()

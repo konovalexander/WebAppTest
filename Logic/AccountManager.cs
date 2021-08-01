@@ -40,7 +40,7 @@ namespace Logic
             if (user == null)
                 return null;
 
-            userRepository.UpdateUser(user);
+            userRepository.UpdateLastLoginDate(user.Id, DateTime.UtcNow);
 
             return new UserInfoResponse
             {

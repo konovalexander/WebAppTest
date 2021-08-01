@@ -9,6 +9,6 @@ namespace Data.Interfaces
         User GetUserById(int id);
         User GetUser(Func<User, bool> predicate);
         void CreateUser(User user);
-        void UpdateUser(User user);
+        void UpdateLastLoginDate(int userId, DateTime dateTime);
     }
 }
