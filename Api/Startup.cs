@@ -1,10 +1,10 @@
-using Data.Interfaces;
-using Data.Repositories;
+using Data;
 using Logic;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,6 +23,9 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var repositoryType = Configuration.GetSection("RepositoryType").Value;
+            var connectionString = Configuration.GetConnectionString("SqlConnection");
+
             services.AddControllersWithViews();
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -31,7 +34,7 @@ namespace Api
                         options.LoginPath = new PathString("/account/login");
                     });
 
-            services.AddSingleton<IUserRepository, MemoryUserRepository>();
+            services.AddRepository(repositoryType, connectionString);
             services.AddSingleton<AccountManager>();
         }
 
