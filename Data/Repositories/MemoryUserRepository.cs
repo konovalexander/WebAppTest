@@ -10,6 +10,11 @@ namespace Data.Repositories
     {
         private readonly List<User> users = new();
 
+        public bool CheckUserExists(string phone, string email)
+        {
+            return users.Any(u => u.Phone == phone || u.Email == email);
+        }
+
         public void CreateUser(User user)
         {
             if (user == null)
@@ -20,24 +25,14 @@ namespace Data.Repositories
             users.Add(user);
         }
 
-        public User GetUser(Func<User, bool> predicate)
+        public User GetUserByPhone(string phone)
         {
-            return users.FirstOrDefault(predicate);
+            return users.FirstOrDefault(u => u.Phone == phone);
         }
 
-        public User GetUserById(int id)
+        public void UpdateLastLoginDate(string phone, DateTime dateTime)
         {
-            var user = users.FirstOrDefault(u => u.Id == id);
-
-            if (user == null)
-                throw new ArgumentNullException($"UserId {id} not found");
-
-            return user;
-        }
-
-        public void UpdateLastLoginDate(int userId, DateTime dateTime)
-        {
-            var existingUser = GetUserById(userId);
+            var existingUser = GetUserByPhone(phone);
             existingUser.LastLogin = dateTime;
         }
 

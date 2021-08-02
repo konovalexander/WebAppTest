@@ -57,7 +57,7 @@ namespace Api
                     });
 
             services.AddRepository(repositoryType, connectionString);
-            services.AddSingleton<AccountManager>();
+            services.AddTransient<AccountManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

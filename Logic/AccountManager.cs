@@ -16,13 +16,14 @@ namespace Logic
 
         public bool Register(RegisterRequest request)
         {
-            var user = userRepository.GetUser(u => u.Email == request.Email || u.Phone == request.Phone);
-            if (user != null)
+            var isUserExists = userRepository.CheckUserExists(request.Phone, request.Email);
+
+            if (isUserExists)
                 return false;
 
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
-            user = new User
+            var user = new User
             {
                 FIO = request.FIO,
                 Phone = request.Phone,
@@ -37,7 +38,7 @@ namespace Logic
 
         public UserInfoResponse Login(string phone, string password)
         {
-            var user = userRepository.GetUser(u => u.Phone == phone);
+            var user = userRepository.GetUserByPhone(phone);
 
             if (user == null)
                 return null;
@@ -45,7 +46,7 @@ namespace Logic
             if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return null;
 
-            userRepository.UpdateLastLoginDate(user.Id, DateTime.UtcNow);
+            userRepository.UpdateLastLoginDate(user.Phone, DateTime.UtcNow);
 
             return new UserInfoResponse
             {
@@ -55,36 +56,10 @@ namespace Logic
                 LastLogin = user.LastLogin
             };
         }
-
-        public UserInfoResponse GetInfo(string token)
-        {
-            if (token == null)
-                return null;
-
-            var phone = token.Split('-')[0];
-
-            var user = userRepository.GetUser(u => u.Phone == phone);
-
-            if (user == null)
-                return null;
-
-            return new()
-            {
-                FIO = user.FIO,
-                Phone = user.Phone,
-                Email = user.Email,
-                LastLogin = user.LastLogin
-            };
-        }
-
-        public User GetUser()
-        {
-            return userRepository.GetUserById(1);
-        }
-
+        
         public UserInfoResponse GetUserByPhone(string phone)
         {
-            var user = userRepository.GetUser(u => u.Phone == phone);
+            var user = userRepository.GetUserByPhone(phone);
 
             if (user == null)
                 throw new ArgumentNullException($"User with phone {phone} does not exist");

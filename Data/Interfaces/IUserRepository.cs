@@ -1,14 +1,13 @@
 ﻿using Data.Entities;
 using System;
-using System.Collections.Generic;
 
 namespace Data.Interfaces
 {
     public interface IUserRepository
     {
-        User GetUserById(int id);
-        User GetUser(Func<User, bool> predicate);
+        User GetUserByPhone(string phone);
+        bool CheckUserExists(string phone, string email);
         void CreateUser(User user);
-        void UpdateLastLoginDate(int userId, DateTime dateTime);
+        void UpdateLastLoginDate(string phone, DateTime dateTime);
     }
 }

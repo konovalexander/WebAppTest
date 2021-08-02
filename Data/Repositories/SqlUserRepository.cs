@@ -14,6 +14,11 @@ namespace Data.Repositories
             this.dbContext = dbContext;
         }
 
+        public bool CheckUserExists(string phone, string email)
+        {
+            return dbContext.Users.Any(u => u.Phone == phone || u.Email == email);
+        }
+
         public void CreateUser(User user)
         {
             if (user == null)
@@ -23,24 +28,14 @@ namespace Data.Repositories
             dbContext.SaveChanges();
         }
 
-        public User GetUser(Func<User, bool> predicate)
+        public User GetUserByPhone(string phone)
         {
-            return dbContext.Users.FirstOrDefault(predicate);
+            return dbContext.Users.FirstOrDefault(u => u.Phone == phone);
         }
 
-        public User GetUserById(int id)
+        public void UpdateLastLoginDate(string phone, DateTime dateTime)
         {
-            var user = dbContext.Users.FirstOrDefault(u => u.Id == id);
-
-            if (user == null)
-                throw new ArgumentNullException($"UserId {id} not found");
-
-            return user;
-        }
-
-        public void UpdateLastLoginDate(int userId, DateTime dateTime)
-        {
-            var existingUser = GetUserById(userId);
+            var existingUser = GetUserByPhone(phone);
             existingUser.LastLogin = dateTime;
             dbContext.SaveChanges();
         }

@@ -47,15 +47,13 @@ namespace Api.Areas.Controllers
             var accessToken = GenerateToken(loginRequest.Phone);
 
             return Ok(new { access_token = accessToken });
-
         }
 
         [HttpPost("get-my-info")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        public ActionResult<UserInfoResponse> GetInfo([FromHeader] string accessToken)
+        public ActionResult<UserInfoResponse> GetInfo()
         {
             var userPhone = User.FindFirstValue(ClaimTypes.MobilePhone);
-
             var response = accountManager.GetUserByPhone(userPhone);
 
             if (response == null)

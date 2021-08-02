@@ -17,7 +17,7 @@ namespace Data
                     break;
 
                 case "database":
-                    services.AddSingleton<IUserRepository, SqlUserRepository>();
+                    services.AddScoped<IUserRepository, SqlUserRepository>();
                     services.AddDbContext<SqlDbContext>(options =>
                     {
                         options.UseSqlServer(connectionString);
