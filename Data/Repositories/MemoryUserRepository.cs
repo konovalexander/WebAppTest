@@ -10,19 +10,6 @@ namespace Data.Repositories
     {
         private readonly List<User> users = new();
 
-        public MemoryUserRepository()
-        {
-            users.Add(new User
-            {
-                Id = 1,
-                FIO = "Коновалов Александр Владимирович",
-                Phone = "79507437731",
-                Email = "konovalexander@rambler.ru",
-                Password = "123",
-                LastLogin = new DateTime()
-            });
-        }
-
         public void CreateUser(User user)
         {
             if (user == null)
@@ -32,7 +19,7 @@ namespace Data.Repositories
             user.Id = id;
             users.Add(user);
         }
-        
+
         public User GetUser(Func<User, bool> predicate)
         {
             return users.FirstOrDefault(predicate);
@@ -51,7 +38,7 @@ namespace Data.Repositories
         public void UpdateLastLoginDate(int userId, DateTime dateTime)
         {
             var existingUser = GetUserById(userId);
-            existingUser.LastLogin = dateTime;            
+            existingUser.LastLogin = dateTime;
         }
 
         private int GenerateId()

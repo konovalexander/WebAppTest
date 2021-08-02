@@ -20,12 +20,14 @@ namespace Logic
             if (user != null)
                 return false;
 
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+
             user = new User
             {
                 FIO = request.FIO,
                 Phone = request.Phone,
                 Email = request.Email,
-                Password = request.Password
+                Password = hashedPassword
             };
 
             userRepository.CreateUser(user);
@@ -35,9 +37,12 @@ namespace Logic
 
         public UserInfoResponse Login(string phone, string password)
         {
-            var user = userRepository.GetUser(u => u.Phone == phone && u.Password == password);
+            var user = userRepository.GetUser(u => u.Phone == phone);
 
             if (user == null)
+                return null;
+
+            if (!BCrypt.Net.BCrypt.Verify(password, user.Password))
                 return null;
 
             userRepository.UpdateLastLoginDate(user.Id, DateTime.UtcNow);
