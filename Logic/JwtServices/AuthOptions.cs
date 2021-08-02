@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace Api
+namespace Logic.JwtServices
 {
     public class AuthOptions
     {

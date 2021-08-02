@@ -1,13 +1,9 @@
 ﻿using Logic;
+using Logic.JwtServices;
 using Logic.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
 namespace Api.Areas.Controllers
@@ -17,12 +13,12 @@ namespace Api.Areas.Controllers
     public class AccountApiController : ControllerBase
     {
         private readonly AccountManager accountManager;
-        private readonly IOptions<AuthOptions> authOptions;
+        private readonly JwtAuthenticateManager jwtAuthManager;
 
-        public AccountApiController(AccountManager accountManager, IOptions<AuthOptions> authOptions)
+        public AccountApiController(AccountManager accountManager, JwtAuthenticateManager jwtAuthManager)
         {
             this.accountManager = accountManager;
-            this.authOptions = authOptions;
+            this.jwtAuthManager = jwtAuthManager;
         }
 
         [HttpPost("register")]
@@ -44,50 +40,44 @@ namespace Api.Areas.Controllers
             if (response == null)
                 return BadRequest(new ErrorResponse("login error", "Invalid phone or password"));
 
-            var accessToken = GenerateToken(loginRequest.Phone);
+            var token = jwtAuthManager.Authenticate(loginRequest.Phone);
 
-            return Ok(new { access_token = accessToken });
+            return Ok(token);
         }
 
-        [HttpPost("get-my-info")]
+        [HttpGet("get-my-info")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult<UserInfoResponse> GetInfo()
         {
-            var userPhone = User.FindFirstValue(ClaimTypes.MobilePhone);
-            var response = accountManager.GetUserByPhone(userPhone);
+            var isAuthenticated = jwtAuthManager.CheckAuthenticateUser(HttpContext.User);
 
-            if (response == null)
-                return NotFound();
+            if (isAuthenticated)
+            {
+                var userPhone = HttpContext.User.FindFirstValue(ClaimTypes.MobilePhone);
+                var response = accountManager.GetUserInfo(userPhone);
 
-            return Ok(response);
+                if (response != null)
+                    return Ok(response);
+            }
+
+            return Unauthorized();
         }
 
         [HttpPost("logout")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public ActionResult Logout()
         {
-            return NoContent();
-        }
+            var isAuthenticated = jwtAuthManager.CheckAuthenticateUser(HttpContext.User);
 
-        private string GenerateToken(string phone)
-        {
-            var authParams = authOptions.Value;
-
-            var securityKey = authParams.GetSymmetricSecurityKey();
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new List<Claim>
+            if (isAuthenticated)
             {
-                new Claim(ClaimTypes.MobilePhone, phone)
-            };
+                var userPhone = HttpContext.User.FindFirstValue(ClaimTypes.MobilePhone);
+                jwtAuthManager.Unauthorize(userPhone);
 
-            var token = new JwtSecurityToken(
-                authParams.Issuer,
-                authParams.Audience,
-                claims,
-                expires: DateTime.Now.AddSeconds(authParams.Lifetime),
-                signingCredentials: credentials);
+                return Ok();
+            }
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return Unauthorized();
         }
     }
 }

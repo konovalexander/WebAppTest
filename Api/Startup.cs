@@ -1,5 +1,6 @@
 using Data;
 using Logic;
+using Logic.JwtServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,12 +25,12 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var repositoryType = Configuration.GetSection("RepositoryType").Value;
-            var connectionString = Configuration.GetConnectionString("SqlConnection");
-
             services.AddControllersWithViews();
 
+            var repositoryType = Configuration.GetSection("RepositoryType").Value;
+            var connectionString = Configuration.GetConnectionString("SqlConnection");
             var authConfig = Configuration.GetSection("Auth");
+
             services.Configure<AuthOptions>(authConfig);
 
             var authOptions = authConfig.Get<AuthOptions>();
@@ -58,6 +59,8 @@ namespace Api
 
             services.AddRepository(repositoryType, connectionString);
             services.AddTransient<AccountManager>();
+            services.AddSingleton<HashStorage>();
+            services.AddSingleton<JwtAuthenticateManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

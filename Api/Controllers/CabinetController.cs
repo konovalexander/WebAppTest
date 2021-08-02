@@ -19,7 +19,7 @@ namespace Api.Controllers
         [Authorize]
         public IActionResult Cabinet()
         {
-            var userInfo = accountManager.GetUserByPhone(User.Identity.Name);
+            var userInfo = accountManager.GetUserInfo(User.Identity.Name);
 
             return View(userInfo);
         }

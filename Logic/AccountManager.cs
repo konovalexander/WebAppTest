@@ -57,12 +57,12 @@ namespace Logic
             };
         }
         
-        public UserInfoResponse GetUserByPhone(string phone)
+        public UserInfoResponse GetUserInfo(string userPhone)
         {
-            var user = userRepository.GetUserByPhone(phone);
+            var user = userRepository.GetUserByPhone(userPhone);
 
             if (user == null)
-                throw new ArgumentNullException($"User with phone {phone} does not exist");
+                throw new ArgumentNullException($"User with phone {userPhone} does not exist");
 
             return new UserInfoResponse
             {
